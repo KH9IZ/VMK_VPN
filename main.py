@@ -1,42 +1,50 @@
-#from copyreg import dispatch_table
-#from numpy import disp
-#from telegram import KeyboardButton, ReplyKeyboardMarkup
-#from telegram.ext.updater import Updater
-#from telegram.update import Update
-#from telegram.ext.callbackcontext import CallbackContext
-#from telegram.ext.commandhandler import CommandHandler
-#from telegram.ext.messagehandler import MessageHandler
-#from telegram.ext.filters import Filters
-
-from telegram import *
-from telegram.ext import *
-from requests import *
+import telebot
+import os
 
 from wg import *
 
+conf = 'config'
 
-conf = "config"
-button1 = [InlineKeyboardButton(text="Get your config!", callback_data=conf)]
-keyboard_inline = InlineKeyboardMarkup([button1])
+try:
+    token = os.environ['vpn_bot_token']
+except:
+    exit()
+
+bot = telebot.TeleBot(token)
 
 
-def startCommand(update: Update, context: CallbackContext):
-    context.bot.send_message(chat_id=update.effective_chat.id,
-                             text="Welcome to the CMC MSU bot for fast and secure VPN connection!",
-                             reply_markup=keyboard_inline)
+def gen_markup():
+    markup = telebot.types.InlineKeyboardMarkup()
+    markup.row_width = 1
+    markup.add(telebot.types.InlineKeyboardButton(
+        "Get your config!", callback_data=conf))
+    return markup
+
+
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    markup = gen_markup()
+    bot.send_message(chat_id=message.chat.id,
+                     text="Welcome to the CMC MSU bot for fast and secure VPN connection!",
+                     reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    if call.data == conf:
+        doc = get_peer_config(call.from_user.id)
+
+        if doc:
+            bot.answer_callback_query(call.id, "Your config is ready!")
+            bot.send_document(chat_id=call.message.chat.id, document=doc)
+        else:
+            bot.answer_callback_query(
+                call.id, "No suitable config found. Sorry!")
 
 
 def main():
-    updater = Updater(token="5477394676:AAEJnw4NxfWY1EoM95arKoW3bdCN02iLCtQ")
-    dp = updater.dispatcher
+    bot.infinity_polling()
 
-    dp.add_handler(CommandHandler("start", startCommand))
-    dp.add_handler(CallbackQueryHandler(getPeerConfig))
-    #dp.add_handler(MessageHandler(Filters.text, getConfig))
-
-    updater.start_polling()
-
-    updater.idle()
 
 if __name__ == "__main__":
     main()
