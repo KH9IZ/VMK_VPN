@@ -6,7 +6,7 @@ import os
 import gettext
 import telebot
 
-from wg import *
+from wg import get_peer_config
 
 
 translation = gettext.translation("messages", "trans", fallback=True)
@@ -26,7 +26,6 @@ def gen_markup(keys, row_width):
     """
     Create inline keyboard of given shape with buttons specified like callback:name in dict
     """
-
     markup = telebot.types.InlineKeyboardMarkup()
     markup.row_width = row_width
     for conf in keys:
@@ -40,10 +39,10 @@ def send_welcome(message):
     """
     Handler for /start command
     """
-
     markup = gen_markup({"config":  _("Get your config!")}, 1)
     bot.send_message(chat_id=message.chat.id,
-                     text=_("Welcome to the CMC MSU bot for fast and secure VPN connection!"),
+                     text=_(
+                         "Welcome to the CMC MSU bot for fast and secure VPN connection!"),
                      reply_markup=markup)
 
 
@@ -52,7 +51,6 @@ def callback_query(call):
     """
     Callback handler to send user his config or to tell him that he doesn't have one
     """
-
     doc = get_peer_config(call.from_user.id)
 
     if doc:
@@ -67,7 +65,6 @@ def main():
     """
     Start bot
     """
-
     bot.infinity_polling()
 
 
