@@ -3,15 +3,20 @@ VPN Bot main function, that declares it's workflow, supported commands and repli
 """
 
 import os
+import gettext
 import telebot
 
 from wg import *
 
 
+translation = gettext.translation("messages", "trans", fallback=True)
+_, ngettext = translation.gettext, translation.ngettext
+
+
 try:
     token = os.environ['vpn_bot_token']
 except Exception as exc:
-    print("Couldn't find VPN BOT token in environment variables. Please, set it!")
+    print(_("Couldn't find VPN BOT token in environment variables. Please, set it!"))
     raise ModuleNotFoundError from exc
 
 bot = telebot.TeleBot(token)
@@ -36,9 +41,9 @@ def send_welcome(message):
     Handler for /start command
     """
 
-    markup = gen_markup({"config":  "Get your config!"}, 1)
+    markup = gen_markup({"config":  _("Get your config!")}, 1)
     bot.send_message(chat_id=message.chat.id,
-                     text="Welcome to the CMC MSU bot for fast and secure VPN connection!",
+                     text=_("Welcome to the CMC MSU bot for fast and secure VPN connection!"),
                      reply_markup=markup)
 
 
@@ -51,11 +56,11 @@ def callback_query(call):
     doc = get_peer_config(call.from_user.id)
 
     if doc:
-        bot.answer_callback_query(call.id, "Your config is ready!")
+        bot.answer_callback_query(call.id, _("Your config is ready!"))
         bot.send_document(chat_id=call.message.chat.id, document=doc)
     else:
         bot.answer_callback_query(
-            call.id, "No suitable config found. Sorry!")
+            call.id, _("No suitable config found. Sorry!"))
 
 
 def main():
