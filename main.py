@@ -14,7 +14,7 @@ _, ngettext = translation.gettext, translation.ngettext
 
 
 try:
-    token = os.environ['vpn_bot_token']
+    token = os.environ['VPN_BOT_TOKEN']
 except Exception as exc:
     print(_("Couldn't find VPN BOT token in environment variables. Please, set it!"))
     raise ModuleNotFoundError from exc
