@@ -1,11 +1,8 @@
-"""
-VPN Bot main function, that declares it's workflow, supported commands and replies
-"""
+"""VPN Bot main function, that declares it's workflow, supported commands and replies."""
 
 import os
 import gettext
 import telebot
-from telebot.formatting import mbold
 
 from wg import get_peer_config
 from models import QuestionAnswer
@@ -23,9 +20,7 @@ except Exception as exc:
 bot = telebot.TeleBot(token)
 
 def gen_markup(keys: dict, row_width: int):
-    """
-    Create inline keyboard of given shape with buttons specified like callback:name in dict
-    """
+    """Create inline keyboard of given shape with buttons specified like callback:name in dict."""
     markup = telebot.types.InlineKeyboardMarkup()
     markup.row_width = row_width
     for conf_data, conf_text in keys.items():
@@ -36,9 +31,7 @@ def gen_markup(keys: dict, row_width: int):
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    """
-    Handler for /start command
-    """
+    """Menu for /start command."""
     markup = gen_markup({"config":  _("Get your config!"),
                          "faq": _("FAQ")}, 1)
     bot.send_message(chat_id=message.chat.id,
@@ -49,12 +42,11 @@ def send_welcome(message):
 
 @bot.callback_query_handler(func=lambda call: call.data == "config")
 def config_query(call):
-    """
-    Callback handler to send user his config or to tell him that he doesn't have one
-    """
+    """Send user his config or to tell him that he doesn't have one."""
+    # pylint: disable = unspecified-encoding
     if (doc := get_peer_config(call.from_user.id)):
         bot.answer_callback_query(call.id, _("Your config is ready!"))
-        with open(doc, 'r', encoding='utf-8') as config_file:
+        with open(doc, 'r') as config_file:
             bot.send_document(chat_id=call.message.chat.id, document=config_file)
     else:
         bot.answer_callback_query(
@@ -63,9 +55,7 @@ def config_query(call):
 
 @bot.callback_query_handler(func=lambda call: call.data == 'faq')
 def faq_menu_query(call):
-    """
-    Handle FAQ menu.
-    """
+    """Handle FAQ menu."""
     config: dict = {}
     for question in QuestionAnswer.select():
         config["faq_question_" + str(question.id)] = question.question
@@ -74,15 +64,13 @@ def faq_menu_query(call):
                               call.message.message_id, reply_markup=gen_markup(config, 1))
 
 
-@bot.callback_query_handler(func=lambda call:
-                            call.data.startswith("faq_question_"))
+@bot.callback_query_handler(func=lambda call: call.data.startswith("faq_question_"))
 def faq_question_query(call):
-    """
-    Handle FAQ question button.
-    """
+    """Handle FAQ question button."""
     question_id = int(call.data.removeprefix("faq_question_"))
-    query = QuestionAnswer.select().where(QuestionAnswer.id == question_id).limit(1)
-    message_text = mbold(query[0].question) + '\n\n' + query[0].answer
+    query = QuestionAnswer.get_by_id(question_id)
+    message_text = f"**{query.question}**\n\n{query.answer}"
+    bot.answer_callback_query(call.id, _("See your answer:"))
     bot.edit_message_text(message_text, call.message.chat.id,
                           call.message.message_id,
                           reply_markup=gen_markup({"faq": _(" « Back")}, 1),
@@ -90,10 +78,8 @@ def faq_question_query(call):
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_main_menu")
-def faq_back_to_main_menu_query(call):
-    """
-    Handle FAQ back button.
-    """
+def back_to_main_menu_query(call):
+    """Handle back to main menu button."""
     markup = gen_markup({"config":  _("Get your config!"),
                          "faq": _("FAQ")}, 1)
     bot.edit_message_text(_("Welcome to the CMC MSU bot for fast and secure VPN connection!"),
@@ -102,9 +88,7 @@ def faq_back_to_main_menu_query(call):
 
 
 def main():
-    """
-    Start bot
-    """
+    """Start bot."""
     bot.infinity_polling()
 
 
