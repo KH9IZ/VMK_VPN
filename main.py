@@ -42,8 +42,7 @@ def send_welcome(message):
 
 @bot.callback_query_handler(func=lambda call: call.data == "config")
 def config_query(call):
-    """Send user his config or to tell him that he doesn't have one."""
-    # pylint: disable = unspecified-encoding
+    """Send user his config or tell him that he doesn't have one."""
     if (doc := get_peer_config(call.from_user.id)):
         bot.answer_callback_query(call.id, _("Your config is ready!"))
         with open(doc, 'r') as config_file:
