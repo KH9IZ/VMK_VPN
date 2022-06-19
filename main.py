@@ -4,7 +4,6 @@ import os
 import logging
 import telebot
 
-from telebot.formatting import mbold
 from wg import get_peer_config
 from models import QuestionAnswer, User
 from trans.i18n_base_midddleware import I18N
@@ -120,7 +119,7 @@ def faq_question_query(call):
     """Handle FAQ question button."""
     question_id = int(call.data.removeprefix("faq_question_"))
     query = QuestionAnswer.get_by_id(question_id)
-    message_text = f"{mbold(query.question)}\n\n{query.answer}"
+    message_text = f"*{query.question}*\n\n{query.answer}"
     bot.answer_callback_query(call.id, _("See your answer:"))
     bot.edit_message_text(message_text, call.message.chat.id,
                           call.message.message_id,
