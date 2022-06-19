@@ -73,7 +73,7 @@ def payment(call):
                      description=ngettext(
                          "Please, pay for {} month of your subscription", "Please, pay for {} month of your subscription", period).format(period),
                      invoice_payload=call.message.chat.id,
-                     provider_token="401643678:TEST:94962ff0-5ee1-4afa-9bf3-676631992c4f",
+                     provider_token=os.environ['PAYMENT_PROVIDER_TOKEN'],
                      currency="RUB",
                      prices=price,
                      start_parameter=call.message.chat.id)
