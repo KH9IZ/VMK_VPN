@@ -52,7 +52,7 @@ def choose_plan(call):
     """
     Give user options to choose suitable plan for him
     """
-    markup = gen_markup({f"{i} month sub": _("{} month".format(i))
+    markup = gen_markup({f"{i} month sub": ngettext("{} month", "{} month", i).format(i)
                         for i in range(1, 4)}, 3)
     bot.send_message(chat_id=call.message.chat.id,
                      text=_("Please, choose duration of your subscription"),
@@ -66,12 +66,12 @@ def payment(call):
     """
     period = int(call.data.split()[0])
     price = [telebot.types.LabeledPrice(
-        label=_("{} month".format(period)), amount=80 * (100 - 5 * (period - 1)) * period)]
+        label=ngettext("{} month", "{} month", period).format(period), amount=80 * (100 - 5 * (period - 1)) * period)]
 
     bot.send_invoice(chat_id=call.message.chat.id,
                      title=_("Subscription"),
-                     description=_(
-                         "Please, pay for {} month of your subscription".format(period)),
+                     description=ngettext(
+                         "Please, pay for {} month of your subscription", "Please, pay for {} month of your subscription", period).format(period),
                      invoice_payload=call.message.chat.id,
                      provider_token="401643678:TEST:94962ff0-5ee1-4afa-9bf3-676631992c4f",
                      currency="RUB",

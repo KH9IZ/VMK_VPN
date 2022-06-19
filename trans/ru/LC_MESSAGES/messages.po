@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-06-14 16:49+0300\n"
+"POT-Creation-Date: 2022-06-19 16:03+0300\n"
 "PO-Revision-Date: 2022-06-14 17:37+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ru\n"
@@ -21,21 +21,63 @@ msgstr ""
 
 #: main.py:19
 msgid "Couldn't find VPN BOT token in environment variables. Please, set it!"
-msgstr "Не удалось найти токен бота среди переменных окружения. Пожалуйста, задайте токен"
+msgstr ""
+"Не удалось найти токен бота среди переменных окружения. Пожалуйста, "
+"задайте токен"
 
-#: main.py:44
+#: main.py:42
+msgid "Pay to get your config!"
+msgstr "Оплатите для получения конфигурационного файла!"
+
+#: main.py:43
+msgid "FAQ"
+msgstr "FAQ"
+
+#: main.py:43
+msgid "Settings"
+msgstr "Настройки"
+
+#: main.py:45
+msgid "Welcome to the CMC MSU bot for fast and secure VPN connection!"
+msgstr ""
+"Добро пожаловать в бот ВМК МГУ для быстрого и безопасного подклюения к "
+"интернету!"
+
+#: main.py:55 main.py:69
+msgid "{} month"
+msgid_plural "{} month"
+msgstr[0] "{} месяц"
+msgstr[1] "{} месяца"
+msgstr[2] "{} месяцев"
+
+#: main.py:58
+msgid "Please, choose duration of your subscription"
+msgstr "Пожалуйста, выберите длительность подписки"
+
+#: main.py:72
+msgid "Subscription"
+msgstr "Подписка"
+
+#: main.py:73
+msgid "Please, pay for {} month of your subscription"
+msgid_plural "Please, pay for {} month of your subscription"
+msgstr[0] "Пожалуйста, заплатите за {} месяц подписки"
+msgstr[1] "Пожалуйста, заплатите за {} месяцa подписки"
+msgstr[2] "Пожалуйста, заплатите за {} месяцев подписки"
+
+#: main.py:98
 msgid "Get your config!"
 msgstr "Получить конфигурационный файл!"
 
-#: main.py:46
-msgid "Welcome to the CMC MSU bot for fast and secure VPN connection!"
-msgstr "Добро пожаловать в бот ВМК МГУ для быстрого и безопасного подклюения к интернету!"
+#: main.py:99
+msgid "Thank you for choosing our VPN!"
+msgstr "Спасибо, что выбрали наш ВПН сервис"
 
-#: main.py:59
+#: main.py:111
 msgid "Your config is ready!"
 msgstr "Ваш конфигурационный файл готов!"
 
-#: main.py:63
+#: main.py:115
 msgid "No suitable config found. Sorry!"
 msgstr "К сожалению, ваш конфигурационный файл не найден. Извините!"
 
