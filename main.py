@@ -5,7 +5,6 @@ VPN Bot main function, that declares it's workflow, supported commands and repli
 import os
 import gettext
 import telebot
-from telegram import LabeledPrice
 
 from wg import get_peer_config
 
@@ -49,7 +48,10 @@ def send_welcome(message):
 
 
 @bot.callback_query_handler(func=lambda call: call.data == "config")
-def callback_query(call):
+def choose_plan(call):
+    """
+    Give user options to choose suitable plan for him
+    """
     markup = gen_markup({f"{i} month sub": _("{} month".format(i))
                         for i in range(1, 4)}, 3)
     bot.send_message(chat_id=call.message.chat.id,
@@ -59,9 +61,12 @@ def callback_query(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.find("month sub") != -1)
 def payment(call):
+    """
+    Generate form for payment
+    """
     period = int(call.data.split()[0])
     price = [telebot.types.LabeledPrice(
-        label=_("{} month".format(period)), amount=80 * 100 * period)]
+        label=_("{} month".format(period)), amount=80 * (100 - 5 * (period - 1)) * period)]
 
     bot.send_invoice(chat_id=call.message.chat.id,
                      title=_("Subscription"),
@@ -72,16 +77,15 @@ def payment(call):
                      currency="RUB",
                      prices=price,
                      start_parameter=call.message.chat.id)
-    
+
     bot.answer_callback_query(call.id)
 
-    #markup = gen_markup({"send config": "Send me config!"}, 1)
-    #bot.send_message(chat_id=call.message.chat.id,
-    #                 text=_("Get your config!"),
-    #                 reply_markup=markup)
 
 @bot.pre_checkout_query_handler(func=lambda call: True)
 def answer_payment(call):
+    """
+    Send respond to users payment. To proceed to vpn config generation
+    """
     bot.answer_pre_checkout_query(call.id, ok=True)
 
 
@@ -92,10 +96,12 @@ def successful_payment(call):
     """
     print(call.chat)
     markup = gen_markup({"send config":  _("Get your config!")}, 1)
-    bot.send_message(call.chat.id, _("Thank you for choosing our VPN!"), reply_markup=markup)
+    bot.send_message(call.chat.id, _(
+        "Thank you for choosing our VPN!"), reply_markup=markup)
+
 
 @bot.callback_query_handler(func=lambda call: call.data == "send config")
-def callback_query(call):
+def send_config(call):
     """
     Callback handler to send user his config or to tell him that he doesn't have one
     """
