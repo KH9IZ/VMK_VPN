@@ -11,11 +11,18 @@ used_ips: set[IPv4Address] = {
 }
 
 def get_peer_config(user_id):
+    """
+    Return user config by user_id.
+
+    :param user_id: unique identifuer of user
+    :return: path to user config
+    :rtype: str
+    """
     wgc = WireGuardConfig(str(user_id))
     if not wgc.exists():
         wgc.create()
     return wgc.get()
-    
+
 
 class WireGuardConfig:
     """Manage config files."""
@@ -55,7 +62,6 @@ class WireGuardConfig:
         """Return selected address."""
         return self.__selected_ip
 
-    # pylint: disable=W0703,W0717 # Disable catching general Exception and big try-except clause.
     def create(self):
         """Create new config file for user.
 
@@ -67,8 +73,8 @@ class WireGuardConfig:
         try:
             privkey, pubkey = self.__generate_keys()
             print(f"{privkey=}\n{pubkey=}")
-            with open(self.SERVER_PUBLIC_KEY_PATH, 'r') as f:
-                self.__fill_out_config(privkey, f.read())
+            with open(self.SERVER_PUBLIC_KEY_PATH, 'r') as serv_pubkey_file:
+                self.__fill_out_config(privkey, serv_pubkey_file.read())
             self.__add_client_key_to_server(pubkey)
             used_ips.add(self.address())
         except subprocess.CalledProcessError as exs:
@@ -93,20 +99,21 @@ AllowedIPs = 0.0.0.0/0 """)
                 if line.startswith("Address"):
                     self.__selected_ip = IPv4Address(line.rpartition('=')[-1].strip())
                     return
-        
 
     def __generate_keys(self) -> tuple[str]:
         """Run bash scripts to generate keys."""
         privkey_proc = subprocess.run(["wg", "genkey"], capture_output=True, check=True)
         privkey = privkey_proc.stdout.strip()
         print(privkey)
-        pubkey_proc = subprocess.run(["wg", "pubkey"], input=privkey, capture_output=True, check=True)
+        pubkey_proc = subprocess.run(["wg", "pubkey"], input=privkey,
+                                     capture_output=True, check=True)
         pubkey = pubkey_proc.stdout.strip()
         print(pubkey)
         return privkey.decode(), pubkey.decode()
 
     def __add_client_key_to_server(self, client_public: str):
         """Add clients public key and IP address to the server."""
-        err, msg = subprocess.getstatusoutput(f"sudo wg set wg0 peer {client_public} allowed-ips {format(self.__selected_ip)}")
+        err, msg = subprocess.getstatusoutput(f"sudo wg set wg0 peer {client_public}" \
+                                               "allowed-ips {format(self.__selected_ip)}")
         if err:
             raise ValueError("Can not add client ip to server!" + msg)
