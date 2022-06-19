@@ -12,22 +12,21 @@ class User(peewee.Model):
     username = peewee.CharField(null=True, unique=True)
     sub_due_date = peewee.DateField(null=True)
     private_ip = peewee.IPField(null=True, unique=True)
-    mac_address = peewee.FixedCharField(null=True)
+    mac_address = peewee.FixedCharField(null=True, max_length=64)
+    public_key = peewee.FixedCharField(null=True, max_length=64)
     lang = peewee.FixedCharField(max_length=2, null=False, default="ru")
 
-    class Meta:  # pylint: disable = too-few-public-methods, missing-class-docstring
-        # noqa: D106  # Disable error with docstrings.
+    class Meta:  # noqa: D106 pylint: disable=missing-class-docstring
         database = db
 
 class QuestionAnswer(peewee.Model):
-    """FAQ data."""
+    """Model represents question-answer pair in FAQ section."""
 
-    id = peewee.PrimaryKeyField()
+    id = peewee.AutoField()
     question = peewee.CharField(null=False)
     answer = peewee.TextField(null=True)
 
-    class Meta:  # pylint: disable = too-few-public-methods, missing-class-docstring
-        # noqa: D106  # Disable error with docstrings.
+    class Meta:  # noqa: D106 pylint: disable=missing-class-docstring
         database = db
 
 if __name__ == "__main__":
