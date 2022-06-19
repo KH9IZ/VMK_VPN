@@ -14,6 +14,7 @@ logging.basicConfig(
     level=logging.INFO
 )
 logger = logging.getLogger('MainScript')
+from models import QuestionAnswer
 
 
 translations = {lang: gettext.translation("messages", "trans", fallback=True, languages=[lang])
@@ -59,7 +60,7 @@ def send_welcome(message):
 
 @bot.callback_query_handler(func=lambda call: call.data == "config")
 def config_query(call):
-    """Send user his config or to tell him that he doesn't have one."""
+    """Send user his config or tell him that he doesn't have one."""
     # pylint: disable = unspecified-encoding
     lang = ("ru" if (user := User.get_or_none(User.id == call.message.chat.id)) is None
             else user.lang)
@@ -154,6 +155,40 @@ def back_to_main_menu_query(call):
                          "faq": _("FAQ", lang),
                          "settings": _("Settings", lang)}, 1)
     bot.edit_message_text(_("Welcome to the CMC MSU bot for fast and secure VPN connection!", lang),
+                          call.message.chat.id,
+                          call.message.message_id, reply_markup=markup)
+
+
+@bot.callback_query_handler(func=lambda call: call.data == 'faq')
+def faq_menu_query(call):
+    """Handle FAQ menu."""
+    config: dict = {}
+    for question in QuestionAnswer.select():
+        config["faq_question_" + str(question.id)] = question.question
+    config["back_to_main_menu"] = _(" « Back")
+    bot.edit_message_text(_("Frequently asked questions"), call.message.chat.id,
+                              call.message.message_id, reply_markup=gen_markup(config, 1))
+
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("faq_question_"))
+def faq_question_query(call):
+    """Handle FAQ question button."""
+    question_id = int(call.data.removeprefix("faq_question_"))
+    query = QuestionAnswer.get_by_id(question_id)
+    message_text = f"**{query.question}**\n\n{query.answer}"
+    bot.answer_callback_query(call.id, _("See your answer:"))
+    bot.edit_message_text(message_text, call.message.chat.id,
+                          call.message.message_id,
+                          reply_markup=gen_markup({"faq": _(" « Back")}, 1),
+                          parse_mode="MARKDOWN")
+
+
+@bot.callback_query_handler(func=lambda call: call.data == "back_to_main_menu")
+def back_to_main_menu_query(call):
+    """Handle back to main menu button."""
+    markup = gen_markup({"config":  _("Get your config!"),
+                         "faq": _("FAQ")}, 1)
+    bot.edit_message_text(_("Welcome to the CMC MSU bot for fast and secure VPN connection!"),
                           call.message.chat.id,
                           call.message.message_id, reply_markup=markup)
 

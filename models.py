@@ -1,10 +1,11 @@
-"""Detabase API."""
+"""Models for interaction with database."""
+
 import peewee
 
 db = peewee.SqliteDatabase('VMK_temp.db')
 
 class User(peewee.Model):
-    """User data fields."""
+    """Model for each registered user (each who tapped on /start)."""
 
     id = peewee.BigIntegerField(null=False, index=True, unique=True,
                                 primary_key=True, help_text="telegram user_id")
