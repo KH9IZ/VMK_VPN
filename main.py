@@ -2,15 +2,12 @@
 
 import os
 import logging
-import typing
 import telebot
-import flag  # pip install emoji-country-flag
 
 from telebot.formatting import mbold
-from telebot.types import Message, CallbackQuery
 from wg import get_peer_config
 from models import QuestionAnswer, User
-from i18n_base_midddleware import I18N
+from trans.i18n_base_midddleware import I18N
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -19,20 +16,7 @@ logging.basicConfig(
 logger = logging.getLogger('MainScript')
 
 
-class I18NMiddleware(I18N):
-    """Dynamic i18n."""
-
-    def process_update_types(self) -> list:
-        """List of update types which you want to be processed."""
-        return ['message', 'callback_query']
-
-    def get_user_language(self, obj: typing.Union[Message, CallbackQuery]):
-        """Language will be used in 'pre_process' method of parent class."""
-        user_id = obj.from_user.id
-        lang = "ru" if (user := User.get_or_none(User.id == user_id)) is None else user.lang
-        return lang
-
-i18n = I18NMiddleware(translations_path='trans', domain_name='messages')
+i18n = I18N(translations_path='trans', domain_name='messages')
 _ = i18n.gettext
 
 
@@ -93,8 +77,7 @@ def faq_menu_query(call):
 @bot.callback_query_handler(func=lambda call: call.data == 'settings')
 def settings_menu_query(call):
     """Handle settings menu."""
-    bot.edit_message_text(_("Settings"), call.message.chat.id,
-                          call.message.message_id,
+    bot.edit_message_text(_("Settings"), call.message.chat.id, call.message.message_id,
                           reply_markup=gen_markup({"change_language": _("Select language"),
                                                    "back_to_main_menu": _(" « Back")}, 1))
 
@@ -102,12 +85,9 @@ def settings_menu_query(call):
 @bot.callback_query_handler(func=lambda call: call.data == 'change_language')
 def change_language_menu_query(call):
     """Handle change language settings menu."""
-    if hasattr(call, 'new_lang'):
-        # You can manually set language by setting the attribute.
-        i18n.switch(call.new_lang)
     config: dict = {}
-    for lang_name, flag_name in {"ru": "ru", "en": "gb"}.items():
-        config["change_lang_to_" + lang_name] = f"{flag.flag(flag_name)} {lang_name}"
+    for lang_name, flag_symbol in {"ru": "\U0001f1f7\U0001f1fa", "en": "\U0001f1ec\U0001f1e7"}.items():
+        config["change_lang_to_" + lang_name] = flag_symbol + ' ' + lang_name
     config["settings"] = _(" « Back")
     bot.edit_message_text(_("Select your language:"), call.message.chat.id,
                               call.message.message_id, reply_markup=gen_markup(config, 1))
@@ -131,7 +111,7 @@ def change_user_language(call):
     bot.answer_callback_query(call.id, _("Language was changed to ", lang=new_lang) + new_lang)
     # Cant just call it: Telegram raise exception when you try to change text to the same one.
     if old_lang != new_lang:
-        setattr(call, 'new_lang', new_lang)
+        i18n.switch(new_lang)
         change_language_menu_query(call)
 
 

@@ -7,8 +7,9 @@ import gettext
 import os
 import threading
 
-from abc import ABCMeta, abstractmethod
+from telebot.types import Message, CallbackQuery
 from telebot.handler_backends import BaseMiddleware
+from models import User
 
 
 class I18N(BaseMiddleware):
@@ -16,8 +17,6 @@ class I18N(BaseMiddleware):
 
     It is based on gettext util.
     """
-
-    __metaclass__ = ABCMeta
 
     context_lang = threading.local()
 
@@ -59,13 +58,15 @@ class I18N(BaseMiddleware):
         translator = self.translations[lang]
         return translator.ngettext(singular, plural, num)
 
-    @abstractmethod
-    def get_user_language(self, obj):
-        """Return user language."""
-
-    @abstractmethod
     def process_update_types(self) -> list:
+        """List of update types which you want to be processed."""
+        return ['message', 'callback_query']
+
+    def get_user_language(self, obj: Message | CallbackQuery):
         """Return any update types which you want to be processed."""
+        user_id = obj.from_user.id
+        lang = "ru" if (user := User.get_or_none(User.id == user_id)) is None else user.lang
+        return lang
 
     def pre_process(self, message, data):
         """Context language variable will be set each time when update from 'process_update_types' comes."""
