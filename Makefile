@@ -35,5 +35,5 @@ i18n-compile: $(I18N_DIR)/*/LC_MESSAGES/$(I18N_DOMAIN).po
 i18n-clean:
 	rm $(I18N_POTNAME) $(I18N_DIR)/*/LC_MESSAGES/$(I18N_DOMAIN).mo
 
-
-
+doc:
+	make -C docs html
