@@ -6,7 +6,7 @@ import os
 import gettext
 import telebot
 
-from wg import get_peer_config
+from wg import get_peer_config, user_have_config
 
 
 translation = gettext.translation("messages", "trans", fallback=True)
@@ -34,13 +34,23 @@ def gen_markup(keys, row_width):
     return markup
 
 
-@bot.message_handler(commands=['start'])
+######################################
+##          Start Message           ##
+######################################
+
+@bot.message_handler(commands=['start', 'menu'])
 def send_welcome(message):
     """
     Handler for /start command
     """
-    markup = gen_markup({"config":  _("Pay to get your config!"),
-                        "faq": _("FAQ"), "settings": _("Settings")}, 3)
+
+    if user_have_config(message.from_user.id) == True:
+        markup = gen_markup({"send config":  _("Give me config!"),
+                             "faq": _("FAQ"), "settings": _("Settings")}, 3)
+    else:
+        markup = gen_markup({"config":  _("Pay to get your config!"),
+                             "faq": _("FAQ"), "settings": _("Settings")}, 3)
+
     bot.send_message(chat_id=message.chat.id,
                      text=_(
                          "Welcome to the CMC MSU bot for fast and secure VPN connection!"),
