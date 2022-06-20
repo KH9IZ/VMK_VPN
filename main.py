@@ -3,6 +3,7 @@
 import os
 import logging
 import telebot
+from datetime import date
 
 from wg import get_peer_config
 from models import QuestionAnswer, User
@@ -16,7 +17,7 @@ logger = logging.getLogger('MainScript')
 
 
 i18n = I18N(translations_path='trans', domain_name='messages')
-_ = i18n.gettext
+_, ngettext = i18n.gettext, i18n.ngettext
 
 
 try:
@@ -49,14 +50,14 @@ def send_welcome(message):
     """
     Handler for /start command
     """
+    user, created = User.get_or_create(id = message.from_user.id)
 
-    if user_have_config(message.from_user.id):
+    print(user, created)
+
+    if user.sub_due_date and user.sub.due_date > date.today():
         markup = gen_markup({"send config":  _("Give me config!"),
                              "faq": _("FAQ"), "settings": _("Settings")}, 3)
     else:
-        new_user = User(id = message.from_user.id, username = message.from_user.username)
-        new_user.save()
-
         markup = gen_markup({"config":  _("Pay to get your config!"),
                              "faq": _("FAQ"), "settings": _("Settings")}, 3)
 
@@ -96,7 +97,7 @@ def payment(call):
                      currency="RUB",
                      prices=price,
                      start_parameter=call.message.chat.id)
-
+ 
     bot.answer_callback_query(call.id)
 
 
@@ -114,9 +115,10 @@ def successful_payment(call):
     If the payment of subscription was successfull, send user his config
     """
     print(call.chat)
+    print(call.from_user.id)
 
     conf = get_peer_config(call.from_user.id)
-
+    print(1)
     user = User.get_by_id(call.message.from_user.id)
     user.private_ip = conf.address()
     user.public_key = conf.get_publickey()
@@ -215,7 +217,7 @@ def back_to_main_menu_query(call):
 def main():
     """Start bot."""
     bot.setup_middleware(i18n)
-    bot.infinity_polling()
+    bot.polling()
 
 
 if __name__ == "__main__":
