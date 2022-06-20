@@ -7,7 +7,7 @@ import gettext
 import telebot
 
 from wg import get_peer_config, user_have_config
-
+from models import QuestionAnswer, User
 
 translation = gettext.translation("messages", "trans", fallback=True)
 _, ngettext = translation.gettext, translation.ngettext
@@ -44,10 +44,13 @@ def send_welcome(message):
     Handler for /start command
     """
 
-    if user_have_config(message.from_user.id) == True:
+    if user_have_config(message.from_user.id):
         markup = gen_markup({"send config":  _("Give me config!"),
                              "faq": _("FAQ"), "settings": _("Settings")}, 3)
     else:
+        new_user = User(id = message.from_user.id, username = message.from_user.username)
+        new_user.save()
+
         markup = gen_markup({"config":  _("Pay to get your config!"),
                              "faq": _("FAQ"), "settings": _("Settings")}, 3)
 
@@ -94,7 +97,7 @@ def payment(call):
 @bot.pre_checkout_query_handler(func=lambda call: True)
 def answer_payment(call):
     """
-    Send respond to users payment. To proceed to vpn config generation
+    Send response to users payment. To proceed to vpn config generation
     """
     bot.answer_pre_checkout_query(call.id, ok=True)
 
@@ -105,6 +108,14 @@ def successful_payment(call):
     If the payment of subscription was successfull, send user his config
     """
     print(call.chat)
+
+    conf = get_peer_config(call.from_user.id)
+
+    user = User.get_by_id(call.message.from_user.id)
+    user.private_ip = conf.address()
+    user.public_key = conf.get_publickey()
+    user.save()
+
     markup = gen_markup({"send config":  _("Get your config!")}, 1)
     bot.send_message(call.chat.id, _(
         "Thank you for choosing our VPN!"), reply_markup=markup)
