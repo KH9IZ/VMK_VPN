@@ -11,10 +11,10 @@ class User(peewee.Model):
                                 primary_key=True, help_text="telegram user_id")
     username = peewee.CharField(null=True, unique=True)
     sub_due_date = peewee.DateField(null=True)
-    private_ip = peewee.IPField(null=True, unique=True,
-                                constraints=[peewee.Check("sub_due_date IS NOT NULL")])
+    private_ip = peewee.IPField(null=True, unique=True)
     mac_address = peewee.FixedCharField(null=True, max_length=64)
     public_key = peewee.FixedCharField(null=True, max_length=64)
+    lang = peewee.FixedCharField(max_length=2, null=False, default="ru")
 
     class Meta:  # noqa: D106 pylint: disable=missing-class-docstring
         database = db
