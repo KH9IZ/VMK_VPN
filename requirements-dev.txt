@@ -1,0 +1,8 @@
+-r requirements.txt
+
+Babel >= 2.10.3
+Sphinx >= 4.5.0
+coverage >= 6.4.1
+pylint >= 2.12.2
+pydocstyle >= 6.1.1
+furo >= 2022.4.7

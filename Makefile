@@ -8,3 +8,6 @@ lint:
 
 test:
 	python -m unittest discover
+
+doc:
+	make -C docs html
