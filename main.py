@@ -96,17 +96,11 @@ def change_language_menu_query(call):
 def change_user_language(call):
     """Change user language."""
     new_lang: str = call.data.removeprefix("change_lang_to_")
-    if (user := User.get_or_none(User.id == call.message.chat.id)) is None:
-        old_lang = 'ru'  # Default one.
-        username = str(call.from_user.first_name + ' ' + call.from_user.last_name)
-        logger.info("Insert in user table new record with username: %s", username)
-        User.create(id=int(call.message.chat.id), username=username,
-                    lang=new_lang)
-    else:
-        old_lang = user.lang
-        if user.lang != new_lang:
-            user.lang = new_lang
-            logger.info("User table updated: %d", user.save())
+    user = User.get_by_id(call.message.chat.id)
+    old_lang = user.lang
+    if old_lang != new_lang:
+        user.lang = new_lang
+        logger.info("User table updated: %d", user.save())
     bot.answer_callback_query(call.id, _("Language was changed to ", lang=new_lang) + new_lang)
     # Cant just call it: Telegram raise exception when you try to change text to the same one.
     if old_lang != new_lang:
