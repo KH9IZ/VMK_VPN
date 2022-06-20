@@ -7,6 +7,7 @@ import telebot
 from wg import get_peer_config
 from models import QuestionAnswer, User
 from trans.i18n_base_midddleware import I18N
+from handle_timeouts import create_timeouts
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -17,7 +18,7 @@ logger = logging.getLogger('MainScript')
 
 i18n = I18N(translations_path='trans', domain_name='messages')
 _ = i18n.gettext
-
+ngettext = i18n.ngettext
 
 try:
     token = os.environ['vpn_bot_token']
@@ -132,9 +133,25 @@ def back_to_main_menu_query(call):
                           call.message.message_id, reply_markup=markup)
 
 
+def send_notification_remain_days(user: User, days_num: int):
+    """Send notification to user that he have days_num days left."""
+    i18n.switch(user.lang)
+    bot.send_message(user.id, ngettext("You have {} day remaining.", "You have {} days remaining.",
+                                       num=days_num).format(days_num),
+                     reply_markup=gen_markup({"pay": _("Extend subscription")}, 1))
+
+
+def send_notification_subscribe_is_out(user: User):
+    """Send notification to user that his subscription is out."""
+    i18n.switch(user.lang)
+    bot.send_message(user.id, _("Your subscription has run out."),
+                     reply_markup=gen_markup({"pay": _("Extend subscription")}, 1))
+
+
 def main():
     """Start bot."""
     bot.setup_middleware(i18n)
+    create_timeouts(send_notification_remain_days, send_notification_subscribe_is_out)
     bot.infinity_polling()
 
 
