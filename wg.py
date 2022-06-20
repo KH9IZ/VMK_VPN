@@ -24,7 +24,7 @@ def get_peer_config(user_id):
     wgc = WireGuardConfig(str(user_id))
     if not wgc.exists():
         wgc.create()
-    return wgc.get()
+    return wgc
 
 
 class WireGuardConfig:
