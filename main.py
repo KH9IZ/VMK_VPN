@@ -10,6 +10,7 @@ import telebot.types as tg_types
 from wg import get_peer_config
 from models import QuestionAnswer, User
 from trans.i18n_base_midddleware import I18N
+from handle_timeouts import create_timeouts
 
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -20,7 +21,6 @@ logger = logging.getLogger('MainScript')
 
 i18n = I18N(translations_path='i18n', domain_name='vmk_vpn')
 _, ngettext = i18n.gettext, i18n.ngettext
-
 
 token = os.environ['VPN_BOT_TOKEN']
 bot = telebot.TeleBot(token, use_class_middlewares=True, threaded=False)
@@ -146,14 +146,11 @@ def successful_payment(msg):
 
 @bot.callback_query_handler(func=lambda call: call.data == "send config")
 def send_config(call):
-    """
-    Callback handler to send user his config or to tell him that he doesn't have one
-    """
-    doc = get_peer_config(call.from_user.id)
-
-    if doc:
+    """Send user his config or tell him that he doesn't have one."""
+    if (doc := get_peer_config(call.from_user.id)):
         bot.answer_callback_query(call.id, _("Your config is ready!"))
-        bot.send_document(chat_id=call.message.chat.id, document=doc)
+        with open(doc, 'r') as config_file:
+            bot.send_document(chat_id=call.message.chat.id, document=config_file)
     else:
         bot.answer_callback_query(
             call.id, _("No suitable config found. Sorry!"))
@@ -229,10 +226,26 @@ def back_to_main_menu_query(call):
                           call.message.message_id, reply_markup=markup)
 
 
+def send_notification_remain_days(user: User, days_num: int):
+    """Send notification to user that he have days_num days left."""
+    i18n.switch(user.lang)
+    bot.send_message(user.id, ngettext("You have {} day remaining.", "You have {} days remaining.",
+                                       num=days_num).format(days_num),
+                     reply_markup=gen_markup({"pay": _("Extend subscription")}, 1))
+
+
+def send_notification_subscribe_is_out(user: User):
+    """Send notification to user that his subscription is out."""
+    i18n.switch(user.lang)
+    bot.send_message(user.id, _("Your subscription has run out."),
+                     reply_markup=gen_markup({"pay": _("Extend subscription")}, 1))
+
+
 def main():
     """Start bot."""
     bot.setup_middleware(i18n)
-    bot.infinity_polling(logger_level=logging.INFO)
+    create_timeouts(send_notification_remain_days, send_notification_subscribe_is_out)
+    bot.infinity_polling()
 
 
 if __name__ == "__main__":
