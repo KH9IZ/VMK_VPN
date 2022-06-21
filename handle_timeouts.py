@@ -4,14 +4,11 @@ import logging
 import datetime
 import threading
 from datetime import date, timedelta
+from collections.abc import Callable
 from wg import WireGuardConfig
 from models import User
-from collections.abc import Callable
 
 logger = logging.getLogger("TimeoutsHandlers")
-
-n_days_remain_callback: Callable[[User, int], None] = None
-run_out_callback: Callable[[User], None] = None
 
 def clear_db(key_remover = WireGuardConfig.remove) -> tuple[set[User], set[User], set[User]]:
     # pylint: disable=not-an-iterable
@@ -39,11 +36,10 @@ def clear_db(key_remover = WireGuardConfig.remove) -> tuple[set[User], set[User]
             result[2].add(user)
     return result
 
-def handler():
+def handler(n_days_remain_callback, run_out_callback):
     """Send notifications and clear database each 24 hours."""
-    global n_days_remain_callback
-    global run_out_callback
-    threading.Timer(60 * 60 * 24, handler).start()
+    threading.Timer(60 * 60 * 24, handler,
+            args=(n_days_remain_callback, run_out_callback)).start()
     logger.info("Handler triggered!")
     users_remain3, users_remain1, users_run_out = clear_db()
     for user in users_remain3:
@@ -54,11 +50,7 @@ def handler():
         run_out_callback(user)
 
 def create_timeouts(days_remain_callback: Callable[[User, int], None],
-                    subscribe_ends_calback: Callable[[User], None]):
+                    subscribe_ends_callback: Callable[[User], None]):
     """Handle subscribe timeout."""
-    global n_days_remain_callback
-    global run_out_callback
-    n_days_remain_callback = days_remain_callback
-    run_out_callback = subscribe_ends_calback
     logger.info("Handler created!")
-    handler()
+    handler(days_remain_callback, subscribe_ends_callback)

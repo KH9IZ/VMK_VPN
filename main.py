@@ -9,7 +9,7 @@ import telebot.types as tg_types
 
 from wg import get_peer_config
 from models import QuestionAnswer, User
-from trans.i18n_base_midddleware import I18N
+from middlewares.i18n_middleware import I18N
 from handle_timeouts import create_timeouts
 
 logging.basicConfig(
@@ -49,7 +49,7 @@ def gen_markup(keys: dict, row_width: int = 1):
 
 @bot.message_handler(commands=['start', 'menu'])
 def send_welcome(message):
-    """Handler for /start command."""
+    """Menu for /start command."""
     user, created = User.get_or_create(id=message.from_user.id,
                                        defaults={'username': message.from_user.username})
     if created:
@@ -70,6 +70,26 @@ def send_welcome(message):
                             "of the CMC MSU.").format(first_name=message.from_user.first_name),
                      reply_markup=markup)
 
+@bot.callback_query_handler(func=lambda call: call.data == "back_to_main_menu")
+def back_to_main_menu_query(call):
+    """Handle back to main menu button."""
+    user = User.get_by_id(call.message.chat.id)
+    if user.is_subscribed():
+        markup = gen_markup({"config":  _("Give me config!"),
+                             "faq": _("FAQ"),
+                             "settings": _("Settings")})
+    else:
+        markup = gen_markup({"pay":  _("Pay to get your config!"),
+                             "faq": _("FAQ"),
+                             "settings": _("Settings")})
+    bot.edit_message_text(_("Welcome to the CMC MSU bot for fast and secure VPN connection!"),
+                          call.message.chat.id,
+                          call.message.message_id, reply_markup=markup)
+
+
+######################################
+##             Payment              ##
+######################################
 
 @bot.callback_query_handler(func=lambda call: call.data == "pay")
 def choose_plan(call):
@@ -84,7 +104,7 @@ def choose_plan(call):
 
 @bot.callback_query_handler(func=lambda call: call.data == "back_to_pay")
 def back_to_choose_plan(call):
-    """Delete payment message and send payment plans"""
+    """Delete payment message and send payment plans."""
     bot.delete_message(chat_id=call.message.chat.id,
                        message_id=call.message.id)
     mp_raw = {f"sub_duration_{i}": ngettext("{} month", "{} months", i).format(i) for i in range(1, 4)}
@@ -97,7 +117,7 @@ def back_to_choose_plan(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("sub_duration"))
 def payment(call):
-    """Generate form for payment"""
+    """Generate form for payment."""
     period = int(call.data.removeprefix("sub_duration_"))
     price = [tg_types.LabeledPrice(
                     label=ngettext("{} month", "{} month", period).format(period),
@@ -126,30 +146,28 @@ def payment(call):
 
 @bot.pre_checkout_query_handler(func=lambda call: True)
 def answer_payment(call):
-    """Send response to users payment. To proceed to vpn config generation"""
+    """Send response to users payment. To proceed to vpn config generation."""
     bot.answer_pre_checkout_query(call.id, ok=True)
 
 
 @bot.message_handler(content_types=['successful_payment'])
 def successful_payment(msg):
-    """If the payment of subscription was successfull, send user his config"""
+    """If the payment of subscription was successfull, send user his config."""
     conf = get_peer_config(msg.from_user.id)
+    # TODO: При повторной оплате добавлять в wg
     user = User.get_by_id(msg.from_user.id)
-    user.private_ip = conf.address()
+    user.private_ip = str(conf.address())  # 00
     user.public_key = conf.get_publickey()
+    user.sub_due_date = date.today() + relativedelta(months=1)
     user.save()
+    send_welcome(msg)
 
-    markup = gen_markup({"send config":  _("Get your config!")}, 1)
-    bot.send_message(call.chat.id, _(
-        "Thank you for choosing our VPN!"), reply_markup=markup)
-
-
-@bot.callback_query_handler(func=lambda call: call.data == "send config")
+@bot.callback_query_handler(func=lambda call: call.data == "config")
 def send_config(call):
     """Send user his config or tell him that he doesn't have one."""
     if (doc := get_peer_config(call.from_user.id)):
         bot.answer_callback_query(call.id, _("Your config is ready!"))
-        with open(doc, 'r') as config_file:
+        with open(doc.get(), 'r') as config_file:
             bot.send_document(chat_id=call.message.chat.id, document=config_file)
     else:
         bot.answer_callback_query(
@@ -213,17 +231,6 @@ def faq_question_query(call):
                           call.message.message_id,
                           reply_markup=gen_markup({"faq": _(" « Back")}, 1),
                           parse_mode="MARKDOWN")
-
-
-@bot.callback_query_handler(func=lambda call: call.data == "back_to_main_menu")
-def back_to_main_menu_query(call):
-    """Handle back to main menu button."""
-    markup = gen_markup({"config":  _("Get your config!"),
-                         "faq": _("FAQ"),
-                         "settings": _("Settings")}, 1)
-    bot.edit_message_text(_("Welcome to the CMC MSU bot for fast and secure VPN connection!"),
-                          call.message.chat.id,
-                          call.message.message_id, reply_markup=markup)
 
 
 def send_notification_remain_days(user: User, days_num: int):

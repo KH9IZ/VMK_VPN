@@ -1,6 +1,6 @@
 .. wiregurad:
 
-WireFuard configuration
+WireGuard configuration
 =======================
 
 Module for configure WireGuard VPN.

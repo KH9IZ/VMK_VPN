@@ -13,19 +13,6 @@ used_ips: set[IPv4Address] = {
     IPv4Address('10.0.0.2')
 }
 
-def get_peer_config(user_id):
-    """
-    Return user config by user_id.
-
-    :param user_id: unique identifuer of user
-    :return: path to user config
-    :rtype: str
-    """
-    wgc = WireGuardConfig(str(user_id))
-    if not wgc.exists():
-        wgc.create()
-    return wgc
-
 
 class WireGuardConfig:
     """Manage config files."""
@@ -82,17 +69,19 @@ class WireGuardConfig:
             privkey, pubkey = self.__generate_keys()
             logger.info("Generated: privkey=%s, pubkey=%s", privkey, pubkey)
             with open(self.SERVER_PUBLIC_KEY_PATH, 'r') as serv_pubkey_file:
-                self.__fill_out_config(privkey, serv_pubkey_file.read())
+                self.__fill_out_config(privkey, pubkey, serv_pubkey_file.read())
             self.__add_client_key_to_server(pubkey)
+            self.__client_publickey = pubkey
             used_ips.add(self.address())
         except subprocess.CalledProcessError as exs:
             raise ValueError("Cannot create user config.") from exs
 
-    def __fill_out_config(self, client_private: str, server_public: str):
+    def __fill_out_config(self, client_private: str, client_public: str, server_public: str):
         """Fill config file for client."""
         with open(self.get(), 'w', encoding='utf-8') as config:
             config.write(f"""[Interface]
 PrivateKey = {client_private}
+# PublicKey = {client_public}
 Address = {format(self.__selected_ip)}
 DNS = {self.DNS_SERVER}
 
@@ -106,7 +95,8 @@ AllowedIPs = 0.0.0.0/0 """)
             for line in cfg:
                 if line.startswith("Address"):
                     self.__selected_ip = IPv4Address(line.rpartition('=')[-1].strip())
-                    return
+                elif line.startswith("# PublicKey"):  # Обязательно нужна '#'
+                    self.__client_publickey = line.rpartition('=')[-1].strip()
 
     def __generate_keys(self) -> tuple[str]:
         """Run bash scripts to generate keys."""
@@ -119,7 +109,7 @@ AllowedIPs = 0.0.0.0/0 """)
 
     def __add_client_key_to_server(self, client_public: str):
         """Add clients public key and IP address to the server."""
-        err, msg = subprocess.getstatusoutput(f"sudo wg set wg0 peer {client_public}"
+        err, msg = subprocess.getstatusoutput(f"sudo wg set wg0 peer {client_public} "
                                               f"allowed-ips {format(self.__selected_ip)}")
         if err:
             raise ValueError("Can not add client ip to server!" + msg)
@@ -135,3 +125,17 @@ AllowedIPs = 0.0.0.0/0 """)
         if err:
             raise ValueError("Can not remove client from server!" + msg)
         logger.info("Remove user public key from server: %s", client_public)
+
+def get_peer_config(user_id: int | str) -> WireGuardConfig:
+    """
+    Return user config by user_id.
+
+    :param user_id: unique identifuer of user
+    :return: path to user config
+    :rtype: str
+    """
+    wgc = WireGuardConfig(str(user_id))
+    if not wgc.exists():
+        print("Creating...")
+        wgc.create()
+    return wgc

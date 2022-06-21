@@ -1,12 +1,22 @@
 PROJECT_NAME = vmk_vpn
 PROJECT_VERSION = v0.0.1
+PROJECT_ROOT ?= VMK_VPN
 
-deploy:
-	# Add deadsnake repo if ubuntu lower then 22
-	sudo apt install python3.10 python3.10-venv python3.10-dev
+:
+
+deploy-docs: docs
+	scp -r docs $(deploy-to):~/$(PROJECT_ROOT)
+
+deploy-i18n: i18n
+	scp -r i18n $(deploy-to):~/$(PROJECT_ROOT)
+
+deploy-dev: Makefile *.py middlewares/i18n_middleware.py
+	scp -r Makefile *.py middlewares $(deploy-to):~/$(PROJECT_ROOT)
+	# ssh $(deploy-to) "sudo -S systemctl restart vmk_vpn && sudo -S systemctl status vmk_vpn"
+	# ssh $(deploy-to) "cd $(PROJECT_ROOT) && source venv/bin/activate && python3.10 main.py"
 
 lint:
-	pylint *.py --disable=unspecified-encoding,too-few-public-methods,unspecified-encoding \
+	pylint *.py --disable=fixme,unspecified-encoding,too-few-public-methods,unspecified-encoding \
 				--max-line-length=110
 	pydocstyle *.py
 

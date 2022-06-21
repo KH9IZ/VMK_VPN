@@ -1,1 +1,5 @@
 pyTelegramBotAPI >= 4.5.1
+dateutil >= 2.8.2
+peewee >= 3.14.10
+gunicorn >= 20.1.0
+flask >= 2.1.2
