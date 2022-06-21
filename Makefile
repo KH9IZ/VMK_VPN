@@ -36,4 +36,4 @@ i18n-clean:
 	rm $(I18N_POTNAME) $(I18N_DIR)/*/LC_MESSAGES/$(I18N_DOMAIN).mo
 
 doc:
-	make -C docs html
+	sphinx-build -M html docs/source docs/build

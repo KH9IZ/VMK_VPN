@@ -2,8 +2,10 @@
 
 import os
 import logging
-import telebot
 from datetime import date
+from dateutil.relativedelta import relativedelta
+import telebot
+import telebot.types as tg_types
 
 from wg import get_peer_config
 from models import QuestionAnswer, User
@@ -16,27 +18,27 @@ logging.basicConfig(
 logger = logging.getLogger('MainScript')
 
 
-i18n = I18N(translations_path='trans', domain_name='messages')
+i18n = I18N(translations_path='i18n', domain_name='vmk_vpn')
 _, ngettext = i18n.gettext, i18n.ngettext
 
 
-try:
-    token = os.environ['VPN_BOT_TOKEN']
-
-except Exception as exc:
-    print(_("Couldn't find VPN BOT token in environment variables. Please, set it!"))
-    raise ModuleNotFoundError from exc
+token = os.environ['VPN_BOT_TOKEN']
+bot = telebot.TeleBot(token, use_class_middlewares=True, threaded=False)
 
 
-bot = telebot.TeleBot(token, use_class_middlewares=True)
+def gen_markup(keys: dict, row_width: int = 1):
+    """
+    Create inline keyboard of given shape with buttons specified like callback:name in dict.
 
-
-def gen_markup(keys: dict, row_width: int):
-    """Create inline keyboard of given shape with buttons specified like callback:name in dict."""
-    markup = telebot.types.InlineKeyboardMarkup()
-    markup.row_width = row_width
+    :param keys: Buttons in 'callback_data: name' format
+    :type keys: dict
+    :param row_width: Width of rows in buttons (default: 1)
+    :type row_width: int
+    :rtype: :class:`tg_types.InlineKeyboardMarkup`
+    """
+    markup = tg_types.InlineKeyboardMarkup(row_width=row_width)
     for conf_data, conf_text in keys.items():
-        markup.add(telebot.types.InlineKeyboardButton(
+        markup.add(tg_types.InlineKeyboardButton(
             conf_text, callback_data=conf_data))
     return markup
 
@@ -47,79 +49,92 @@ def gen_markup(keys: dict, row_width: int):
 
 @bot.message_handler(commands=['start', 'menu'])
 def send_welcome(message):
-    """
-    Handler for /start command
-    """
-    user, created = User.get_or_create(id = message.from_user.id)
+    """Handler for /start command."""
+    user, created = User.get_or_create(id=message.from_user.id,
+                                       defaults={'username': message.from_user.username})
+    if created:
+        logger.info("user %d created", user.id)
 
-    print(user, created)
-
-    if user.sub_due_date and user.sub.due_date > date.today():
-        markup = gen_markup({"send config":  _("Give me config!"),
-                             "faq": _("FAQ"), "settings": _("Settings")}, 3)
+    if user.is_subscribed():
+        markup = gen_markup({"config":  _("Give me config!"),
+                             "faq": _("FAQ"),
+                             "settings": _("Settings")})
     else:
-        markup = gen_markup({"config":  _("Pay to get your config!"),
-                             "faq": _("FAQ"), "settings": _("Settings")}, 3)
+        markup = gen_markup({"pay":  _("Pay to get your config!"),
+                             "faq": _("FAQ"),
+                             "settings": _("Settings")})
 
     bot.send_message(chat_id=message.chat.id,
-                     text=_(
-                         "Welcome to the CMC MSU bot for fast and secure VPN connection!"),
+                     text=_("Greetings, {first_name}! \nIn this bot, you can buy a subscription " \
+                            "to a VPN service organized by students " \
+                            "of the CMC MSU.").format(first_name=message.from_user.first_name),
                      reply_markup=markup)
 
 
-@bot.callback_query_handler(func=lambda call: call.data == "config")
+@bot.callback_query_handler(func=lambda call: call.data == "pay")
 def choose_plan(call):
-    """
-    Give user options to choose suitable plan for him
-    """
-    markup = gen_markup({f"{i} month sub": ngettext("{} month", "{} month", i).format(i)
-                        for i in range(1, 4)}, 3)
-    bot.send_message(chat_id=call.message.chat.id,
-                     text=_("Please, choose duration of your subscription"),
-                     reply_markup=markup)
+    """Give user options to choose suitable plan for him."""
+    mp_raw = {f"sub_duration_{i}": ngettext("{} month", "{} months", i).format(i) for i in range(1, 4)}
+    mp_raw["back_to_main_menu"] = _(" « Back")
+    bot.edit_message_text(text=_("Please, choose duration of your subscription"),
+                          chat_id=call.message.chat.id,
+                          message_id=call.message.message_id,
+                          reply_markup=gen_markup(mp_raw))
+    bot.answer_callback_query(call.id)
+
+@bot.callback_query_handler(func=lambda call: call.data == "back_to_pay")
+def back_to_choose_plan(call):
+    """Delete payment message and send payment plans"""
+    bot.delete_message(chat_id=call.message.chat.id,
+                       message_id=call.message.id)
+    mp_raw = {f"sub_duration_{i}": ngettext("{} month", "{} months", i).format(i) for i in range(1, 4)}
+    mp_raw["back_to_main_menu"] = _(" « Back")
+    bot.send_message(text=_("Please, choose duration of your subscription"),
+                          chat_id=call.message.chat.id,
+                          reply_markup=gen_markup(mp_raw))
+    bot.answer_callback_query(call.id)
 
 
-@bot.callback_query_handler(func=lambda call: call.data.find("month sub") != -1)
+@bot.callback_query_handler(func=lambda call: call.data.startswith("sub_duration"))
 def payment(call):
-    """
-    Generate form for payment
-    """
-    period = int(call.data.split()[0])
-    price = [telebot.types.LabeledPrice(
-        label=ngettext("{} month", "{} month", period).format(period), amount=80 * (100 - 5 * (period - 1)) * period)]
+    """Generate form for payment"""
+    period = int(call.data.removeprefix("sub_duration_"))
+    price = [tg_types.LabeledPrice(
+                    label=ngettext("{} month", "{} month", period).format(period),
+                    amount=80 * (100 - 5 * (period - 1)) * period)]
+    bot.delete_message(chat_id=call.message.chat.id,
+                       message_id=call.message.id)
+    markup = tg_types.InlineKeyboardMarkup(row_width=1)
+    markup.add(
+            tg_types.InlineKeyboardButton(_("Pay"), pay=True),
+            tg_types.InlineKeyboardButton(_(" « Back"), callback_data="back_to_pay"),
+    )
 
     bot.send_invoice(chat_id=call.message.chat.id,
                      title=_("Subscription"),
-                     description=ngettext(
-                         "Please, pay for {} month of your subscription", "Please, pay for {} month of your subscription", period).format(period),
+                     description=ngettext("Please, pay for {} month of your subscription",
+                                          "Please, pay for {} months of your subscription",
+                                          period).format(period),
                      invoice_payload=call.message.chat.id,
                      provider_token=os.environ['PAYMENT_PROVIDER_TOKEN'],
                      currency="RUB",
                      prices=price,
-                     start_parameter=call.message.chat.id)
- 
+                     start_parameter=call.message.chat.id,
+                     reply_markup=markup)
     bot.answer_callback_query(call.id)
 
 
 @bot.pre_checkout_query_handler(func=lambda call: True)
 def answer_payment(call):
-    """
-    Send response to users payment. To proceed to vpn config generation
-    """
+    """Send response to users payment. To proceed to vpn config generation"""
     bot.answer_pre_checkout_query(call.id, ok=True)
 
 
 @bot.message_handler(content_types=['successful_payment'])
-def successful_payment(call):
-    """
-    If the payment of subscription was successfull, send user his config
-    """
-    print(call.chat)
-    print(call.from_user.id)
-
-    conf = get_peer_config(call.from_user.id)
-    print(1)
-    user = User.get_by_id(call.message.from_user.id)
+def successful_payment(msg):
+    """If the payment of subscription was successfull, send user his config"""
+    conf = get_peer_config(msg.from_user.id)
+    user = User.get_by_id(msg.from_user.id)
     user.private_ip = conf.address()
     user.public_key = conf.get_publickey()
     user.save()
@@ -217,7 +232,7 @@ def back_to_main_menu_query(call):
 def main():
     """Start bot."""
     bot.setup_middleware(i18n)
-    bot.polling()
+    bot.infinity_polling(logger_level=logging.INFO)
 
 
 if __name__ == "__main__":

@@ -79,6 +79,8 @@ class I18N(BaseMiddleware):
 
     def post_process(self, message, data, exception):
         """Do not do anything."""
+        if exception:
+            raise exception
 
     def __find_translations(self):
         """Look for translations with passed 'domain' in passed 'path'."""
