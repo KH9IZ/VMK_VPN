@@ -24,7 +24,7 @@ def get_peer_config(user_id):
     wgc = WireGuardConfig(str(user_id))
     if not wgc.exists():
         wgc.create()
-    return wgc.get()
+    return wgc
 
 
 class WireGuardConfig:
@@ -80,7 +80,7 @@ class WireGuardConfig:
             raise ValueError("No available ip for client!")
         try:
             privkey, pubkey = self.__generate_keys()
-            logger.info(f"{privkey=} , {pubkey=}")
+            logger.info("Generated: privkey=%s, pubkey=%s", privkey, pubkey)
             with open(self.SERVER_PUBLIC_KEY_PATH, 'r') as serv_pubkey_file:
                 self.__fill_out_config(privkey, serv_pubkey_file.read())
             self.__add_client_key_to_server(pubkey)
@@ -123,14 +123,15 @@ AllowedIPs = 0.0.0.0/0 """)
                                               f"allowed-ips {format(self.__selected_ip)}")
         if err:
             raise ValueError("Can not add client ip to server!" + msg)
-        else:
-            logger.info("Added user public key to server: %s %s", self.__client_name, client_public)
+        logger.info("Added user public key to server: %s %s", self.__client_name, client_public)
 
     @staticmethod
     def remove(client_public: str):
-        """Remove client public key from the server."""
+        """Remove client public key from the server.
+
+        This will work good even if key already deleted.
+        """
         err, msg = subprocess.getstatusoutput(f"sudo wg set wg0 peer {client_public} remove")
         if err:
             raise ValueError("Can not remove client from server!" + msg)
-        else:
-            logger.info("Remove user public key from server: %s", client_public)
+        logger.info("Remove user public key from server: %s", client_public)

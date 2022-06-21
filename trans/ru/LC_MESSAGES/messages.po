@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-06-17 19:50+0300\n"
+"POT-Creation-Date: 2022-06-20 19:17+0300\n"
 "PO-Revision-Date: 2022-06-14 17:37+0300\n"
 "Last-Translator: jispar@mail.ru\n"
 "Language-Team: ru <LL@li.org>\n"
@@ -19,58 +19,73 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 "Generated-By: Babel 2.9.1\n"
 
-#: main.py:24
+#: main.py:26
 msgid "Couldn't find VPN BOT token in environment variables. Please, set it!"
 msgstr ""
 "Не удалось найти токен бота среди переменных окружения. Пожалуйста, задайте "
 "токен"
 
-#: main.py:43 main.py:139
+#: main.py:45 main.py:128
 msgid "Get your config!"
 msgstr "Получить конфигурационный файл!"
 
-#: main.py:44 main.py:140
+#: main.py:46 main.py:129
 msgid "FAQ"
 msgstr "Часто задаваемые вопросы"
 
-#: main.py:45 main.py:85 main.py:141
+#: main.py:47 main.py:80 main.py:130
 msgid "Settings"
 msgstr "Настройки"
 
-#: main.py:48 main.py:142
+#: main.py:50 main.py:131
 msgid "Welcome to the CMC MSU bot for fast and secure VPN connection!"
 msgstr ""
 "Добро пожаловать в бот ВМК МГУ для быстрого и безопасного подклюения к "
 "интернету!"
 
-#: main.py:59
+#: main.py:58
 msgid "Your config is ready!"
 msgstr "Ваш конфигурационный файл готов!"
 
-#: main.py:64
+#: main.py:63
 msgid "No suitable config found. Sorry!"
 msgstr "К сожалению, ваш конфигурационный файл не найден. Извините!"
 
-#: main.py:75 main.py:88 main.py:99 main.py:130
+#: main.py:72 main.py:82 main.py:91 main.py:121
 msgid " « Back"
 msgstr " « Обратно"
 
-#: main.py:76
+#: main.py:73
 msgid "Frequently asked questions"
 msgstr "Часто задаваемые вопросы"
 
-#: main.py:87
+#: main.py:81
 msgid "Select language"
 msgstr "Выберете язык"
 
-#: main.py:100
+#: main.py:92
 msgid "Select your language:"
 msgstr "Выберете свой язык:"
 
-#: main.py:116
+#: main.py:105
 msgid "Language was changed to "
 msgstr "Язык был изменён на "
 
-#: main.py:127
+#: main.py:118
 msgid "See your answer:"
 msgstr "Посмотрите свой ответ:"
+
+#: main.py:139
+msgid "You have {} day remaining."
+msgid_plural "You have {} days remaining."
+msgstr[0] "У вас остался {} день подписки."
+msgstr[1] "У вас осталось {} дня подписки."
+msgstr[2] "У вас осталось {} дней подписки."
+
+#: main.py:141 main.py:148
+msgid "Extend subscription"
+msgstr "Продлить подписку"
+
+#: main.py:147
+msgid "Your subscription has run out."
+msgstr "Ваша подписка закончилась."
