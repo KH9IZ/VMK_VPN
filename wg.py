@@ -1,9 +1,12 @@
 """Creating wireguard configuration."""
 
+import logging
 from ipaddress import IPv4Address, ip_network
 import os.path
 from random import choice
 import subprocess
+
+logger = logging.getLogger("WireGuard")
 
 used_ips: set[IPv4Address] = {
     IPv4Address('10.0.0.1'),
@@ -27,6 +30,7 @@ def get_peer_config(user_id):
 class WireGuardConfig:
     """Manage config files."""
 
+    __client_publickey: str
     __client_name: str
     __selected_ip: IPv4Address
 
@@ -62,6 +66,10 @@ class WireGuardConfig:
         """Return selected address."""
         return self.__selected_ip
 
+    def get_publickey(self) -> str:
+        """Return created user public key."""
+        return self.__client_publickey
+
     def create(self):
         """Create new config file for user.
 
@@ -72,7 +80,7 @@ class WireGuardConfig:
             raise ValueError("No available ip for client!")
         try:
             privkey, pubkey = self.__generate_keys()
-            print(f"{privkey=}\n{pubkey=}")
+            logger.info(f"{privkey=} , {pubkey=}")
             with open(self.SERVER_PUBLIC_KEY_PATH, 'r') as serv_pubkey_file:
                 self.__fill_out_config(privkey, serv_pubkey_file.read())
             self.__add_client_key_to_server(pubkey)
@@ -104,16 +112,25 @@ AllowedIPs = 0.0.0.0/0 """)
         """Run bash scripts to generate keys."""
         privkey_proc = subprocess.run(["wg", "genkey"], capture_output=True, check=True)
         privkey = privkey_proc.stdout.strip()
-        print(privkey)
         pubkey_proc = subprocess.run(["wg", "pubkey"], input=privkey,
                                      capture_output=True, check=True)
         pubkey = pubkey_proc.stdout.strip()
-        print(pubkey)
         return privkey.decode(), pubkey.decode()
 
     def __add_client_key_to_server(self, client_public: str):
         """Add clients public key and IP address to the server."""
-        err, msg = subprocess.getstatusoutput(f"sudo wg set wg0 peer {client_public}" \
-                                               "allowed-ips {format(self.__selected_ip)}")
+        err, msg = subprocess.getstatusoutput(f"sudo wg set wg0 peer {client_public}"
+                                              f"allowed-ips {format(self.__selected_ip)}")
         if err:
             raise ValueError("Can not add client ip to server!" + msg)
+        else:
+            logger.info("Added user public key to server: %s %s", self.__client_name, client_public)
+
+    @staticmethod
+    def remove(client_public: str):
+        """Remove client public key from the server."""
+        err, msg = subprocess.getstatusoutput(f"sudo wg set wg0 peer {client_public} remove")
+        if err:
+            raise ValueError("Can not remove client from server!" + msg)
+        else:
+            logger.info("Remove user public key from server: %s", client_public)
