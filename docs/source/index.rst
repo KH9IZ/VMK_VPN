@@ -11,11 +11,14 @@ Welcome to ВМК VPN's documentation!
    :caption: Contents:
    :hidden:
 
+   grade_project.rst
    bot.rst
    wireguard.rst
    models.rst
 
 
+
+:ref:`grade_project`.
 
 
 Indices and tables

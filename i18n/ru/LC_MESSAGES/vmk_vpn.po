@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vmk_vpn v0.0.1\n"
 "Report-Msgid-Bugs-To: knyazevegor01@mail.ru\n"
-"POT-Creation-Date: 2022-06-22 02:54+0300\n"
+"POT-Creation-Date: 2022-06-22 05:12+0300\n"
 "PO-Revision-Date: 2022-06-21 01:25+0300\n"
 "Last-Translator: Egor Knyazev <knyazevegor01@mail.ru>\n"
 "Language: ru\n"
@@ -17,118 +17,110 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
-"Generated-By: Babel 2.9.1\n"
+"Generated-By: Babel 2.10.3\n"
 
-#: main.py:26
-msgid "Couldn't find VPN BOT token in environment variables. Please, set it!"
-msgstr ""
-"Не удалось найти токен бота среди переменных окружения. Пожалуйста, задайте "
-"токен"
-
-#: main.py:69 main.py:88
+#: main.py:59 main.py:78
 msgid "Give me config!"
 msgstr "Получить конфигурационный файл!"
 
-#: main.py:70 main.py:74 main.py:89 main.py:93
+#: main.py:60 main.py:64 main.py:79 main.py:83
 msgid "FAQ"
 msgstr "Часто задаваемые вопросы"
 
-#: main.py:71 main.py:75 main.py:90 main.py:94 main.py:201
+#: main.py:61 main.py:65 main.py:80 main.py:84 main.py:191
 msgid "Settings"
 msgstr "Настройки"
 
-#: main.py:73 main.py:92
+#: main.py:63 main.py:82
 #, fuzzy
 msgid "Pay to get your config!"
 msgstr "Получить конфигурационный файл!"
 
-#: main.py:78
+#: main.py:68
 msgid ""
 "Greetings, {first_name}! \n"
 "In this bot, you can buy a subscription to a VPN service organized by "
 "students of the CMC MSU."
 msgstr ""
 
-#: main.py:95
+#: main.py:85
 msgid "Welcome to the CMC MSU bot for fast and secure VPN connection!"
 msgstr ""
 "Добро пожаловать в бот ВМК МГУ для быстрого и безопасного подклюения к "
 "интернету!"
 
-#: main.py:107 main.py:120 main.py:133
+#: main.py:97 main.py:110 main.py:123
 msgid "{} month"
 msgid_plural "{} months"
 msgstr[0] "{} месяц"
 msgstr[1] "{} месяца"
 msgstr[2] "{} месцев"
 
-#: main.py:108 main.py:121 main.py:140 main.py:193 main.py:203 main.py:212
-#: main.py:242
+#: main.py:98 main.py:111 main.py:130 main.py:183 main.py:193 main.py:202
+#: main.py:232
 msgid " « Back"
 msgstr " « Обратно"
 
-#: main.py:109 main.py:122
+#: main.py:99 main.py:112
 msgid "Please, choose duration of your subscription"
 msgstr "Пожалуйста, выберите продолжительность Вашей подписки"
 
-#: main.py:139
+#: main.py:129
 msgid "Pay"
 msgstr ""
 
-#: main.py:144
+#: main.py:134
 msgid "Subscription"
 msgstr "Подписка"
 
-#: main.py:145
+#: main.py:135
 msgid "Please, pay for {} month of your subscription"
 msgid_plural "Please, pay for {} months of your subscription"
 msgstr[0] "Пожалуйста, оплатите {} месяц подписки"
 msgstr[1] "Пожалуйста, оплатите {} месяца подписки"
 msgstr[2] "Пожалуйста, оплатите {} месяцев подписки"
 
-#: main.py:179
+#: main.py:169
 msgid "Your config is ready!"
 msgstr "Ваш конфигурационный файл готов!"
 
-#: main.py:184
+#: main.py:174
 msgid "No suitable config found. Sorry!"
 msgstr "К сожалению, ваш конфигурационный файл не найден. Извините!"
 
-#: main.py:194
+#: main.py:184
 msgid "Frequently asked questions"
 msgstr "Часто задаваемые вопросы"
 
-#: main.py:202
+#: main.py:192
 msgid "Select language"
 msgstr "Выберете язык"
 
-#: main.py:213
+#: main.py:203
 msgid "Select your language:"
 msgstr "Выберете свой язык:"
 
-#: main.py:226
+#: main.py:216
 msgid "Language was changed to "
 msgstr "Язык был изменён на "
 
-#: main.py:239
+#: main.py:229
 msgid "See your answer:"
 msgstr "Посмотрите свой ответ:"
 
-#: main.py:249 main.py:264
+#: main.py:239 main.py:254
 msgid "You have {} day remaining."
 msgid_plural "You have {} days remaining."
 msgstr[0] "У вас остался {} день подписки."
 msgstr[1] "У вас осталось {} дня подписки."
 msgstr[2] "У вас осталось {} дней подписки."
 
-#: main.py:251 main.py:258 main.py:266 main.py:273
+#: main.py:241 main.py:248 main.py:256 main.py:263
 #, fuzzy
 msgid "Extend subscription"
 msgstr "Продлить подписку"
 
-#: main.py:257 main.py:272
+#: main.py:247 main.py:262
 msgid "Your subscription has run out."
 msgstr ""
 

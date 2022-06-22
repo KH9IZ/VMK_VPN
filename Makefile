@@ -2,8 +2,6 @@ PROJECT_NAME = vmk_vpn
 PROJECT_VERSION = v0.0.1
 PROJECT_ROOT ?= VMK_VPN
 
-:
-
 deploy-docs: docs
 	scp -r docs $(deploy-to):~/$(PROJECT_ROOT)
 
@@ -21,7 +19,7 @@ lint:
 	pydocstyle *.py
 
 test:
-	python -m unittest discover
+	python -m unittest discover -s tests 
 
 I18N_DOMAIN = $(PROJECT_NAME)
 I18N_DIR = i18n
@@ -39,11 +37,24 @@ i18n-update: $(I18N_POTNAME)
 	pybabel update --input-file=$(I18N_POTNAME) --output-dir=$(I18N_DIR)\
 		--domain=$(I18N_DOMAIN) --update-header-comment $(extra_args)  
 
-i18n-compile: $(I18N_DIR)/*/LC_MESSAGES/$(I18N_DOMAIN).po
+i18n-compile: $(I18N_DIR)/*/LC_MESSAGES/$(I18N_DOMAIN).po i18n-update
 	pybabel compile --domain=$(I18N_DOMAIN) --directory=$(I18N_DIR) --use-fuzzy --statistics $(extra_args) 
 
 i18n-clean:
-	rm $(I18N_POTNAME) $(I18N_DIR)/*/LC_MESSAGES/$(I18N_DOMAIN).mo
+	rm -f $(I18N_POTNAME) $(I18N_DIR)/*/LC_MESSAGES/$(I18N_DOMAIN).mo
 
 doc:
 	sphinx-build -M html docs/source docs/build
+
+doc-clean:
+	make -C docs clean
+
+build: i18n-compile doc
+
+deploy: build deploy-i18n deploy-docs deploy-dev
+	
+
+clean: i18n-clean doc-clean
+	rm -rf __pycache__
+
+	
