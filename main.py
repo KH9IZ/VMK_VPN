@@ -248,6 +248,21 @@ def send_notification_subscribe_is_out(user: User):
                      reply_markup=gen_markup({"pay": _("Extend subscription")}, 1))
 
 
+def send_notification_remain_days(user: User, days_num: int):
+    """Send notification to user that he have days_num days left."""
+    i18n.switch(user.lang)
+    bot.send_message(user.id, ngettext("You have {} day remaining.", "You have {} days remaining.",
+                                       num=days_num).format(days_num),
+                     reply_markup=gen_markup({"pay": _("Extend subscription")}, 1))
+
+
+def send_notification_subscribe_is_out(user: User):
+    """Send notification to user that his subscription is out."""
+    i18n.switch(user.lang)
+    bot.send_message(user.id, _("Your subscription has run out."),
+                     reply_markup=gen_markup({"pay": _("Extend subscription")}, 1))
+
+
 def main():
     """Start bot."""
     bot.setup_middleware(i18n)
