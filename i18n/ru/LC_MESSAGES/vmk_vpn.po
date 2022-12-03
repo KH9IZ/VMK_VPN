@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: vmk_vpn v0.0.1\n"
 "Report-Msgid-Bugs-To: knyazevegor01@mail.ru\n"
-"POT-Creation-Date: 2022-06-22 05:12+0300\n"
+"POT-Creation-Date: 2022-06-22 08:03+0300\n"
 "PO-Revision-Date: 2022-06-21 01:25+0300\n"
 "Last-Translator: Egor Knyazev <knyazevegor01@mail.ru>\n"
 "Language: ru\n"
@@ -27,7 +27,7 @@ msgstr "Получить конфигурационный файл!"
 msgid "FAQ"
 msgstr "Часто задаваемые вопросы"
 
-#: main.py:61 main.py:65 main.py:80 main.py:84 main.py:191
+#: main.py:61 main.py:65 main.py:80 main.py:84 main.py:196
 msgid "Settings"
 msgstr "Настройки"
 
@@ -36,91 +36,88 @@ msgstr "Настройки"
 msgid "Pay to get your config!"
 msgstr "Получить конфигурационный файл!"
 
-#: main.py:68
+#: main.py:68 main.py:85
 msgid ""
 "Greetings, {first_name}! \n"
 "In this bot, you can buy a subscription to a VPN service organized by "
 "students of the CMC MSU."
 msgstr ""
+"Приветсевую, {first_name}! \n"
+"В этом боте ты можешь купить подписку на VPN сервис организованный "
+"студентами ВМК."
 
-#: main.py:85
-msgid "Welcome to the CMC MSU bot for fast and secure VPN connection!"
-msgstr ""
-"Добро пожаловать в бот ВМК МГУ для быстрого и безопасного подклюения к "
-"интернету!"
-
-#: main.py:97 main.py:110 main.py:123
+#: main.py:101 main.py:114 main.py:127
 msgid "{} month"
 msgid_plural "{} months"
 msgstr[0] "{} месяц"
 msgstr[1] "{} месяца"
 msgstr[2] "{} месцев"
 
-#: main.py:98 main.py:111 main.py:130 main.py:183 main.py:193 main.py:202
-#: main.py:232
+#: main.py:102 main.py:115 main.py:134 main.py:187 main.py:198 main.py:208
+#: main.py:239
 msgid " « Back"
 msgstr " « Обратно"
 
-#: main.py:99 main.py:112
+#: main.py:103 main.py:116
 msgid "Please, choose duration of your subscription"
 msgstr "Пожалуйста, выберите продолжительность Вашей подписки"
 
-#: main.py:129
+#: main.py:133
 msgid "Pay"
 msgstr ""
 
-#: main.py:134
+#: main.py:138
 msgid "Subscription"
 msgstr "Подписка"
 
-#: main.py:135
+#: main.py:139
 msgid "Please, pay for {} month of your subscription"
 msgid_plural "Please, pay for {} months of your subscription"
 msgstr[0] "Пожалуйста, оплатите {} месяц подписки"
 msgstr[1] "Пожалуйста, оплатите {} месяца подписки"
 msgstr[2] "Пожалуйста, оплатите {} месяцев подписки"
 
-#: main.py:169
+#: main.py:173
 msgid "Your config is ready!"
 msgstr "Ваш конфигурационный файл готов!"
 
-#: main.py:174
+#: main.py:178
 msgid "No suitable config found. Sorry!"
 msgstr "К сожалению, ваш конфигурационный файл не найден. Извините!"
 
-#: main.py:184
+#: main.py:188
 msgid "Frequently asked questions"
 msgstr "Часто задаваемые вопросы"
 
-#: main.py:192
+#: main.py:197
 msgid "Select language"
 msgstr "Выберете язык"
 
-#: main.py:203
+#: main.py:209
 msgid "Select your language:"
 msgstr "Выберете свой язык:"
 
-#: main.py:216
+#: main.py:223
 msgid "Language was changed to "
 msgstr "Язык был изменён на "
 
-#: main.py:229
+#: main.py:236
 msgid "See your answer:"
 msgstr "Посмотрите свой ответ:"
 
-#: main.py:239 main.py:254
+#: main.py:246
 msgid "You have {} day remaining."
 msgid_plural "You have {} days remaining."
 msgstr[0] "У вас остался {} день подписки."
 msgstr[1] "У вас осталось {} дня подписки."
 msgstr[2] "У вас осталось {} дней подписки."
 
-#: main.py:241 main.py:248 main.py:256 main.py:263
+#: main.py:248 main.py:255
 #, fuzzy
 msgid "Extend subscription"
 msgstr "Продлить подписку"
 
-#: main.py:247 main.py:262
+#: main.py:254
 msgid "Your subscription has run out."
 msgstr ""
 
@@ -135,4 +132,10 @@ msgstr ""
 
 #~ msgid "Thank you for choosing our VPN!"
 #~ msgstr "Спасибо за выбор нашего VPN!"
+
+#~ msgid "Welcome to the CMC MSU bot for fast and secure VPN connection!"
+#~ msgstr ""
+#~ "Добро пожаловать в бот ВМК МГУ для"
+#~ " быстрого и безопасного подклюения к "
+#~ "интернету!"
 

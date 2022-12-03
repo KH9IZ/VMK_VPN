@@ -82,9 +82,13 @@ def back_to_main_menu_query(call):
         markup = gen_markup({"pay":  _("Pay to get your config!"),
                              "faq": _("FAQ"),
                              "settings": _("Settings")})
-    bot.edit_message_text(_("Welcome to the CMC MSU bot for fast and secure VPN connection!"),
-                          call.message.chat.id,
-                          call.message.message_id, reply_markup=markup)
+    bot.edit_message_text(text=_("Greetings, {first_name}! \nIn this bot, you can buy a subscription " \
+                            "to a VPN service organized by students " \
+                            "of the CMC MSU.").format(first_name=call.message.chat.first_name),
+                          chat_id=call.message.chat.id,
+                          message_id=call.message.message_id,
+                          reply_markup=markup)
+    bot.answer_callback_query(call.id)
 
 
 ######################################
@@ -183,6 +187,7 @@ def faq_menu_query(call):
     config["back_to_main_menu"] = _(" « Back")
     bot.edit_message_text(_("Frequently asked questions"), call.message.chat.id,
                               call.message.message_id, reply_markup=gen_markup(config, 1))
+    bot.answer_callback_query(call.id)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'settings')
@@ -191,6 +196,7 @@ def settings_menu_query(call):
     bot.edit_message_text(_("Settings"), call.message.chat.id, call.message.message_id,
                           reply_markup=gen_markup({"change_language": _("Select language"),
                                                    "back_to_main_menu": _(" « Back")}, 1))
+    bot.answer_callback_query(call.id)
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'change_language')
@@ -202,6 +208,7 @@ def change_language_menu_query(call):
     config["settings"] = _(" « Back")
     bot.edit_message_text(_("Select your language:"), call.message.chat.id,
                               call.message.message_id, reply_markup=gen_markup(config, 1))
+    bot.answer_callback_query(call.id)
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("change_lang_to_"))
@@ -231,21 +238,6 @@ def faq_question_query(call):
                           call.message.message_id,
                           reply_markup=gen_markup({"faq": _(" « Back")}, 1),
                           parse_mode="MARKDOWN")
-
-
-def send_notification_remain_days(user: User, days_num: int):
-    """Send notification to user that he have days_num days left."""
-    i18n.switch(user.lang)
-    bot.send_message(user.id, ngettext("You have {} day remaining.", "You have {} days remaining.",
-                                       num=days_num).format(days_num),
-                     reply_markup=gen_markup({"pay": _("Extend subscription")}, 1))
-
-
-def send_notification_subscribe_is_out(user: User):
-    """Send notification to user that his subscription is out."""
-    i18n.switch(user.lang)
-    bot.send_message(user.id, _("Your subscription has run out."),
-                     reply_markup=gen_markup({"pay": _("Extend subscription")}, 1))
 
 
 def send_notification_remain_days(user: User, days_num: int):
