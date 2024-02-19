@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 import telebot
 import telebot.types as tg_types
 
-from wg import get_peer_config
+# from wg import get_peer_config
 from models import QuestionAnswer, User
 from middlewares.i18n_middleware import I18N
 from handle_timeouts import create_timeouts
@@ -19,10 +19,10 @@ logging.basicConfig(
 logger = logging.getLogger('MainScript')
 
 
-i18n = I18N(translations_path='i18n', domain_name='vmk_vpn')
+i18n = I18N(translations_path='i18n', domain_name='chauss_vpn')
 _, ngettext = i18n.gettext, i18n.ngettext
 
-token = os.environ['VPN_BOT_TOKEN']
+token = os.environ['BOT_TOKEN']
 bot = telebot.TeleBot(token, use_class_middlewares=True, threaded=False)
 
 
@@ -140,7 +140,7 @@ def payment(call):
                                           "Please, pay for {} months of your subscription",
                                           period).format(period),
                      invoice_payload=call.message.chat.id,
-                     provider_token=os.environ['PAYMENT_PROVIDER_TOKEN'],
+                     provider_token=os.environ['BOT_PAYMENT_PROVIDER_TOKEN'],
                      currency="RUB",
                      prices=price,
                      start_parameter=call.message.chat.id,
@@ -157,19 +157,19 @@ def answer_payment(call):
 @bot.message_handler(content_types=['successful_payment'])
 def successful_payment(msg):
     """If the payment of subscription was successfull, send user his config."""
-    conf = get_peer_config(msg.from_user.id)
-    # TODO: При повторной оплате добавлять в wg
-    user = User.get_by_id(msg.from_user.id)
-    user.private_ip = str(conf.address())  # 00
-    user.public_key = conf.get_publickey()
-    user.sub_due_date = date.today() + relativedelta(months=1)
-    user.save()
+    # conf = get_peer_config(msg.from_user.id)
+    # # TODO: При повторной оплате добавлять в wg
+    # user = User.get_by_id(msg.from_user.id)
+    # user.private_ip = str(conf.address())  # 00
+    # user.public_key = conf.get_publickey()
+    # user.sub_due_date = date.today() + relativedelta(months=1)
+    # user.save()
     send_welcome(msg)
 
 @bot.callback_query_handler(func=lambda call: call.data == "config")
 def send_config(call):
     """Send user his config or tell him that he doesn't have one."""
-    if (doc := get_peer_config(call.from_user.id)):
+    if False:  # (doc := get_peer_config(call.from_user.id)):
         bot.answer_callback_query(call.id, _("Your config is ready!"))
         with open(doc.get(), 'r') as config_file:
             bot.send_document(chat_id=call.message.chat.id, document=config_file)

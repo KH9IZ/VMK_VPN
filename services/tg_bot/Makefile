@@ -1,17 +1,5 @@
-PROJECT_NAME = vmk_vpn
+PROJECT_NAME = chauss_vpn
 PROJECT_VERSION = v0.0.1
-PROJECT_ROOT ?= VMK_VPN
-
-deploy-docs: docs
-	scp -r docs $(deploy-to):~/$(PROJECT_ROOT)
-
-deploy-i18n: i18n
-	scp -r i18n $(deploy-to):~/$(PROJECT_ROOT)
-
-deploy-dev: Makefile *.py middlewares/i18n_middleware.py
-	scp -r Makefile *.py middlewares $(deploy-to):~/$(PROJECT_ROOT)
-	# ssh $(deploy-to) "sudo -S systemctl restart vmk_vpn && sudo -S systemctl status vmk_vpn"
-	# ssh $(deploy-to) "cd $(PROJECT_ROOT) && source venv/bin/activate && python3.10 main.py"
 
 lint:
 	pylint *.py --disable=fixme,unspecified-encoding,too-few-public-methods,unspecified-encoding \
@@ -51,10 +39,5 @@ doc-clean:
 
 build: i18n-compile doc
 
-deploy: build deploy-i18n deploy-docs deploy-dev
-	
-
 clean: i18n-clean doc-clean
 	rm -rf __pycache__
-
-	

@@ -5,12 +5,12 @@ import datetime
 import threading
 from datetime import date, timedelta
 from collections.abc import Callable
-from wg import WireGuardConfig
+#from wg import WireGuardConfig
 from models import User
 
 logger = logging.getLogger("TimeoutsHandlers")
 
-def clear_db(key_remover = WireGuardConfig.remove) -> tuple[set[User], set[User], set[User]]:
+def clear_db(key_remover):  # = WireGuardConfig.remove) -> tuple[set[User], set[User], set[User]]:
     # pylint: disable=not-an-iterable
     """Remove old user from database. Remove their keys from server.
 
@@ -41,7 +41,7 @@ def handler(n_days_remain_callback, run_out_callback):
     threading.Timer(60 * 60 * 24, handler,
             args=(n_days_remain_callback, run_out_callback)).start()
     logger.info("Handler triggered!")
-    users_remain3, users_remain1, users_run_out = clear_db()
+    users_remain3, users_remain1, users_run_out = (), (), ()  # clear_db()
     for user in users_remain3:
         n_days_remain_callback(user, 3)
     for user in users_remain1:

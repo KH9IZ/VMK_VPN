@@ -1,0 +1,39 @@
+version: "3"
+
+services:
+
+  nginx:
+    image: nginx:latest
+    volumes:
+     - ./tg_bot/nginx.conf:/etc/nginx/templates/tg_bot.conf.template:ro
+     - ./site/nginx.conf:/etc/nginx/templates/default.conf.template:ro
+     - /etc/ssl/certs/cert.pub:/etc/nginx/ssl/cert.pub:ro
+     - /etc/ssl/private/cert.key:/etc/nginx/ssl/cert.key:ro
+    ports:
+     - "80:80"
+     - "${TG_PORT}:${TG_PORT}"
+    environment:
+     - NGINX_HOST=${HOST}
+     - NGINX_TG_PORT=${TG_PORT}
+
+  site:
+    image: "site"
+    build: ./site
+    
+  xray:
+    image: "xray"
+    build: ./xray
+    ports:
+     - "443:443"
+
+  tg_bot:
+    image: "tg_bot"
+    build: ./tg_bot
+    volumes:
+     - /etc/ssl/certs/cert.pub:/etc/ssl/cert.pub:ro
+     - /etc/ssl/private/cert.key:/etc/ssl/cert.key:ro
+    environment:
+     - BOT_TOKEN=${BOT_TOKEN}
+     - BOT_PAYMENT_PROVIDER_TOKEN=${BOT_PAYMENT_PROVIDER_TOKEN}
+     - BOT_HOST=${HOST}
+     - BOT_PORT=${TG_PORT}

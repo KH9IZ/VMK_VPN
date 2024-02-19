@@ -1,0 +1,55 @@
+{
+  "inbounds": [
+    {
+      "listen": "127.0.0.1",
+      "port": 10084,
+      "protocol": "dokodemo-door",
+      "settings": { "address": "127.0.0.1" },
+      "tag": "api"
+    },
+    {
+      "port": 443,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "f04af864-cba8-48aa-8754-ff264f5afb41",
+	    "email": "user1@test",
+	    "flow": "xtls-rprx-vision"
+          },
+          {
+            "id": "2c027e28-e787-4046-9826-6be8309d816c",
+	    "email": "user2@test",
+	    "flow": "xtls-rprx-vision"
+          }
+	],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "show": true,
+          "dest": "nginx:443",
+          "xver": 0,
+          "serverNames": [
+            "localhost"
+          ],
+          "privateKey": "kBGJmxnHwp4R5GmbTsH-S3Vw2BWd_B4dplG_AX5YCBM",
+          "minClientVer": "",
+          "maxClientVer": "",
+          "maxTimeDiff": 0,
+          "shortIds": ["28053bfd4cfe561e", "6893e38f461f8aa6"]
+        }
+      },
+      "tag": "vless_tls",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls"
+        ]
+      }
+    }
+  ]
+}
