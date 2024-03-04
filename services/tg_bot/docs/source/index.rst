@@ -13,8 +13,6 @@ Welcome to ВМК VPN's documentation!
 
    grade_project.rst
    bot.rst
-   wireguard.rst
-   models.rst
 
 
 

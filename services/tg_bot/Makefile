@@ -1,21 +1,21 @@
 PROJECT_NAME = chauss_vpn
-PROJECT_VERSION = v0.0.1
+PROJECT_VERSION = v0.1.0
 
 lint:
-	pylint *.py --disable=fixme,unspecified-encoding,too-few-public-methods,unspecified-encoding \
+	pylint bot/*.py --disable=fixme,unspecified-encoding,too-few-public-methods,unspecified-encoding \
 				--max-line-length=110
-	pydocstyle *.py
+	pydocstyle bot/*.py
 
 test:
 	python -m unittest discover -s tests 
 
 I18N_DOMAIN = $(PROJECT_NAME)
-I18N_DIR = i18n
+I18N_DIR = bot/i18n
 I18N_POTNAME = messages.pot
 
-$(I18N_POTNAME): *.py
+$(I18N_POTNAME): bot/*.py
 	pybabel extract --project=$(PROJECT_NAME) --version=$(PROJECT_VERSION) \
-		--add-comments="May the 4th be with u! \(._.)/"	--output-file=$(I18N_POTNAME) $(extra_args) *.py
+		--add-comments="May the 4th be with u! \(._.)/"	--output-file=$(I18N_POTNAME) $(extra_args) bot/*.py
 
 i18n-init: $(I18N_POTNAME)
 	pybabel init --domain=$(I18N_DOMAIN) --input-file=$(I18N_POTNAME) --locale=$(locale) \

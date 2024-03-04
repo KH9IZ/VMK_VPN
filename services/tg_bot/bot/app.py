@@ -1,12 +1,17 @@
+import json
 from flask import (
     abort,
     Flask,
+    request,
 )
+from telebot.types import Update
 
 from main import bot
+from models import create_tables
 
 
 app = Flask(__name__)
+create_tables()
 
 
 @app.route('/bot<token>', methods=['POST'])

@@ -1,6 +1,4 @@
-venv/
-*.pyc
-*.db
+__pycache__
 .coverage
 docs/build
 *.mo

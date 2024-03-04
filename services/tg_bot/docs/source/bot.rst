@@ -5,5 +5,5 @@ Telegram bot functionality
 
 Here lies all documentation about bot handlers.
 
-.. automodule:: main
+.. automodule:: bot.main
     :members:

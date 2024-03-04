@@ -9,7 +9,6 @@ import threading
 
 from telebot.types import Message, CallbackQuery
 from telebot.handler_backends import BaseMiddleware
-from models import User
 
 
 class I18N(BaseMiddleware):
@@ -65,7 +64,7 @@ class I18N(BaseMiddleware):
     def get_user_language(self, obj: Message | CallbackQuery):
         """Return any update types which you want to be processed."""
         user_id = obj.from_user.id
-        lang = "ru" if (user := User.get_or_none(User.id == user_id)) is None else user.lang
+        lang = "ru"  # if (user := User.get_or_none(User.id == user_id)) is None else user.lang
         return lang
 
     def pre_process(self, message, data):

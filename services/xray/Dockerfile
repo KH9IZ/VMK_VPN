@@ -1,6 +1,6 @@
 FROM ghcr.io/xtls/xray-core:latest
 
-COPY configs.d /etc/xray/conf.d
+COPY configs.d/* /etc/xray/conf.d/
 RUN rm /etc/xray/config.json
 
 ENV TZ=Europe/Berlin

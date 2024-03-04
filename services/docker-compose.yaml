@@ -25,6 +25,7 @@ services:
     build: ./xray
     ports:
      - "443:443"
+     - "10084:10084"  # TODO remove
 
   tg_bot:
     image: "tg_bot"
@@ -37,3 +38,27 @@ services:
      - BOT_PAYMENT_PROVIDER_TOKEN=${BOT_PAYMENT_PROVIDER_TOKEN}
      - BOT_HOST=${HOST}
      - BOT_PORT=${TG_PORT}
+     - DATABASE=${DATABASE}
+     - DB_USER=${DB_USER}
+     - DB_PASSWD=${DB_PASSWD}
+       #    depends_on:
+       #      db:
+       #        condition: service_healthy
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+     - MARIADB_RANDOM_ROOT_PASSWORD=1
+     - MARIADB_DATABASE=${DATABASE}
+     - MARIADB_USER=${DB_USER}
+     - MARIADB_PASSWORD=${DB_PASSWD}
+     - MARIADB_ROOT_HOST=localhost
+    healthcheck:
+     test: ["CMD", "healthcheck.sh", "--connect"]
+     timeout: 20s
+     retries: 10
+  
+  api:
+    image: api
+    build: api
